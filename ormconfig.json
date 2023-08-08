@@ -1,0 +1,8 @@
+{
+    "type": "postgres",
+    "username": "twitteradmin",
+    "password": "twitteradmin",
+    "database": "twitter-clone",
+    "entities": ["dist/**/*.entity{.ts, .js}"],
+    "synchronized": true
+}
