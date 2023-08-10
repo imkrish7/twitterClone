@@ -2,13 +2,16 @@ import {
     Controller,
     Get,
     Post,
+    Put,
     Logger,
     NotFoundException,
     Param,
     Body,
     Patch,
+    UseGuards,
 } from '@nestjs/common';
 import {
+    ApiBearerAuth,
     ApiBody,
     ApiProperty,
     ApiPropertyOptional,
@@ -16,6 +19,8 @@ import {
 } from '@nestjs/swagger';
 import { UserService } from './user.service';
 import { UserEntity } from './user.entity';
+import { AuthGuard } from 'src/auth/auth.guard';
+import { User } from 'src/auth/auth.decorator';
 
 export class UserCreateRequestBody {
     @ApiProperty()
@@ -93,5 +98,28 @@ export class UserController {
     ): Promise<any> {
         const user = await this.userService.updateUser(userId, updateUser);
         return user;
+    }
+
+    @ApiBearerAuth()
+    @UseGuards(AuthGuard)
+    @Put('/:userId/follow')
+    async userFollow(
+        @User() follower: UserEntity,
+        @Param('userId') followeeId: string,
+    ): Promise<any> {
+        return await this.userService.createUserFollowRelation(
+            follower,
+            followeeId,
+        );
+    }
+
+    @ApiBearerAuth()
+    @UseGuards(AuthGuard)
+    @Put('/:userId/unfollow')
+    async unfollowUser(
+        @User() follower: UserEntity,
+        @Param('userId') followeeId: string,
+    ): Promise<any> {
+        return await this.userService.unfollowUser(follower, followeeId);
     }
 }

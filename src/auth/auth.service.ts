@@ -8,12 +8,18 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { PasswordEntity } from './password.entity';
 import { Repository } from 'typeorm';
 import { compare, hash } from 'bcrypt';
+import { SessionEntity } from './sessions.entity';
+import { UserEntity } from 'src/user/user.entity';
 
 @Injectable()
 export class AuthService {
     constructor(
         @InjectRepository(PasswordEntity)
         private passwordRepo: Repository<PasswordEntity>,
+        @InjectRepository(SessionEntity)
+        private sessionRepo: Repository<SessionEntity>,
+        @InjectRepository(UserEntity)
+        private userRepo: Repository<UserEntity>,
     ) {}
 
     public static PASSWORD_SALT_ROUNDS = 10;
@@ -49,5 +55,50 @@ export class AuthService {
         hashedPassword: string,
     ): Promise<boolean> {
         return (await compare(password, hashedPassword)) === true;
+    }
+
+    public async getUserFromSessionToken(
+        authToken: string,
+    ): Promise<UserEntity> {
+        const session = await this.sessionRepo.findOne({
+            where: { id: authToken },
+        });
+
+        if (!session) {
+            throw new UnauthorizedException('Session does not exists');
+        }
+
+        const user = session.user;
+
+        if (!user) {
+            throw new UnauthorizedException('User not found');
+        }
+        return user;
+    }
+
+    async createNewSession(username: string, password: string): Promise<any> {
+        const user = await this.userRepo.findOne({ where: { username } });
+
+        if (!user) {
+            throw new NotFoundException('User does not exist');
+        }
+
+        const userPassword = await this.passwordRepo.findOne({
+            where: { userId: user.id },
+        });
+
+        const passwordMatch = await this.matchPassHash(
+            password,
+            userPassword.password,
+        );
+        if (!passwordMatch) {
+            throw new UnauthorizedException('Password is wrong');
+        }
+
+        const session = new SessionEntity();
+
+        session.userId = user.id;
+        const savedSession = await this.sessionRepo.save(session);
+        return savedSession;
     }
 }
