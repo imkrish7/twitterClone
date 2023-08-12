@@ -89,4 +89,24 @@ export class UserService {
             throw new NotFoundException('No follow relationship found');
         }
     }
+
+    async getFollowers(followingId: string): Promise<UserFollowerEntity[]> {
+        const followee = await this.getUserByUserId(followingId);
+        if (!followee) {
+            throw new NotFoundException('User does not exist');
+        }
+        return await this.userFollowerRepo.findBy({
+            followee: followee,
+        });
+    }
+
+    async getFollowings(followerId: string): Promise<UserFollowerEntity[]> {
+        const follower = await this.getUserByUserId(followerId);
+        if (!follower) {
+            throw new NotFoundException('User does not exist');
+        }
+        return await this.userFollowerRepo.findBy({
+            follower: follower,
+        });
+    }
 }

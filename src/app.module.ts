@@ -13,6 +13,7 @@ import { PostsModule } from './posts/posts.module';
 import { HashtagsModule } from './hashtags/hashtags.module';
 import { AuthModule } from './auth/auth.module';
 import { PasswordEntity } from './auth/password.entity';
+import { UserFollowerEntity } from './user/user-follower.entity';
 
 @Module({
     imports: [
@@ -24,7 +25,12 @@ import { PasswordEntity } from './auth/password.entity';
             synchronize: true,
             logger: 'advanced-console',
             logging: 'all',
-            entities: [UserEntity, PostEntity, PasswordEntity],
+            entities: [
+                UserEntity,
+                PostEntity,
+                PasswordEntity,
+                UserFollowerEntity,
+            ],
         }),
         UserModule,
         PostsModule,

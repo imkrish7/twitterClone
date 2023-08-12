@@ -19,8 +19,9 @@ import {
 } from '@nestjs/swagger';
 import { UserService } from './user.service';
 import { UserEntity } from './user.entity';
-import { AuthGuard } from 'src/auth/auth.guard';
+import { AuthGuard, OptionalGaurd } from 'src/auth/auth.guard';
 import { User } from 'src/auth/auth.decorator';
+import { UserFollowerEntity } from './user-follower.entity';
 
 export class UserCreateRequestBody {
     @ApiProperty()
@@ -121,5 +122,21 @@ export class UserController {
         @Param('userId') followeeId: string,
     ): Promise<any> {
         return await this.userService.unfollowUser(follower, followeeId);
+    }
+
+    @UseGuards(OptionalGaurd)
+    @Get('/:userId/followers')
+    async getFollowers(
+        @Param('userId') followingId: string,
+    ): Promise<UserFollowerEntity[]> {
+        return await this.userService.getFollowers(followingId);
+    }
+
+    @UseGuards(OptionalGaurd)
+    @Get('/:userId/followers')
+    async getFollowings(
+        @Param('userId') followerId: string,
+    ): Promise<UserFollowerEntity[]> {
+        return await this.userService.getFollowings(followerId);
     }
 }
