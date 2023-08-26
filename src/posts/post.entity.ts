@@ -6,7 +6,7 @@ import { Column, Entity, JoinColumn, ManyToOne, OneToOne } from 'typeorm';
 export class PostEntity extends BaseEntity {
     @ManyToOne(() => UserEntity)
     @JoinColumn({ name: 'author_id' })
-    authorId: UserEntity;
+    author: UserEntity;
 
     @Column({ length: 240 })
     text: string;
